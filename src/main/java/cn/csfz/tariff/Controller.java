@@ -2,14 +2,11 @@ package cn.csfz.tariff;
 
 
 import cn.csfz.tariff.model.Tariff;
+import cn.csfz.tariff.service.ITariffService;
 import cn.csfz.tariff.util.OkHttpUtils;
-import io.reactivex.*;
+import io.reactivex.Flowable;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,9 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
 
 @RestController
 @Slf4j
@@ -31,13 +27,14 @@ public class Controller {
 
 
     @Autowired
+    ITariffService ITariffService;
+
+    @Autowired
     OkHttpUtils okHttpUtils;
 
     @RequestMapping("tariff")
-    public List<Tariff> tariff(int index) throws IOException {
-        List<Tariff> tariffList = new ArrayList<>();
-        Observable.range(index, 1).map(number -> Jsoup.connect("http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=" + number).post()).map(document -> documentToTariff(document)).subscribe(tariffs -> tariffList.addAll(tariffs));
-        return tariffList;
+    public Boolean tariff(int index) throws IOException {
+        return Flowable.range(index, 1).map(number -> Jsoup.connect("http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=" + number).post()).map(document -> documentToTariff(document)).collect((Callable<List<Tariff>>) () -> new ArrayList<Tariff>(), (tariffs, tariffs2) -> tariffs.addAll(tariffs2)).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
     }
 
 
