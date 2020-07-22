@@ -4,6 +4,7 @@ package cn.csfz.tariff;
 import cn.csfz.tariff.model.Tariff;
 import cn.csfz.tariff.service.ITariffService;
 import cn.csfz.tariff.util.OkHttpUtils;
+import com.alibaba.fastjson.JSONObject;
 import io.reactivex.Flowable;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -59,6 +60,7 @@ public class Controller {
             tariff.setCustomsSupervisionConditions(element.child(6).children().get(3).text());
             tariff.setInspectionAndQuarantineCategory(element.child(6).children().get(5).text());
             tariffs.add(tariff);
+            log.error(JSONObject.toJSONString(tariffs));
         }
         return tariffs;
     }
