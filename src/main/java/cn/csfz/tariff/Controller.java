@@ -34,41 +34,35 @@ public class Controller {
     OkHttpUtils okHttpUtils;
 
     @RequestMapping("tariff")
-    public void tariff() throws IOException {
-        Observable.range(1, 2401).map(number -> Jsoup.connect("http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=" + number).post()).map(new Function<Document, List<Tariff>>() {
-            @Override
-            public List<Tariff> apply(@NonNull Document document) throws Exception {
-                Elements elements = document.getElementsByClass("scx_item");
-                List<Tariff> tariffs = new ArrayList<>();
-                for (Element element : elements) {
-                    Tariff tariff = new Tariff();
-                    tariff.setHsCode(element.child(0).select(".even").text());
-                    tariff.setName(element.child(1).select(".even").text());
-                    tariff.setItems(element.child(2).select(".even").text());
-                    tariff.setUnit1(element.child(3).children().get(1).text());
-                    tariff.setUnit2(element.child(3).children().get(3).text());
-                    tariff.setMfnImportRate(element.child(4).children().get(1).text());
-                    tariff.setGeneralImportRate(element.child(4).children().get(3).text());
-                    tariff.setTentativeImportRate(element.child(4).children().get(5).text());
-                    tariff.setConsumptionRate(element.child(5).children().get(1).text());
-                    tariff.setImportTariffRate(element.child(5).children().get(3).text());
-                    tariff.setExportRebateRate(element.child(5).children().get(5).text());
-                    tariff.setVatRate(element.child(6).children().get(1).text());
-                    tariff.setCustomsSupervisionConditions(element.child(6).children().get(3).text());
-                    tariff.setInspectionAndQuarantineCategory(element.child(6).children().get(5).text());
-                    tariffs.add(tariff);
-                }
-                return tariffs;
-            }
-        }).subscribe(new Consumer<List<Tariff>>() {
-            List<Tariff> tariffList = new ArrayList<>();
+    public List<Tariff> tariff(int index) throws IOException {
+        List<Tariff> tariffList = new ArrayList<>();
+        Observable.range(index, 1).map(number -> Jsoup.connect("http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=" + number).post()).map(document -> documentToTariff(document)).subscribe(tariffs -> tariffList.addAll(tariffs));
+        return tariffList;
+    }
 
-            @Override
-            public void accept(List<Tariff> tariffs) throws Exception {
-                tariffList.addAll(tariffs);
-            }
-        });
 
+    private List<Tariff> documentToTariff(Document document) {
+        Elements elements = document.getElementsByClass("scx_item");
+        List<Tariff> tariffs = new ArrayList<>();
+        for (Element element : elements) {
+            Tariff tariff = new Tariff();
+            tariff.setHsCode(element.child(0).select(".even").text());
+            tariff.setName(element.child(1).select(".even").text());
+            tariff.setItems(element.child(2).select(".even").text());
+            tariff.setUnit1(element.child(3).children().get(1).text());
+            tariff.setUnit2(element.child(3).children().get(3).text());
+            tariff.setMfnImportRate(element.child(4).children().get(1).text());
+            tariff.setGeneralImportRate(element.child(4).children().get(3).text());
+            tariff.setTentativeImportRate(element.child(4).children().get(5).text());
+            tariff.setConsumptionRate(element.child(5).children().get(1).text());
+            tariff.setImportTariffRate(element.child(5).children().get(3).text());
+            tariff.setExportRebateRate(element.child(5).children().get(5).text());
+            tariff.setVatRate(element.child(6).children().get(1).text());
+            tariff.setCustomsSupervisionConditions(element.child(6).children().get(3).text());
+            tariff.setInspectionAndQuarantineCategory(element.child(6).children().get(5).text());
+            tariffs.add(tariff);
+        }
+        return tariffs;
     }
 
 
