@@ -5,8 +5,6 @@ import cn.csfz.tariff.model.Tariff;
 import cn.csfz.tariff.service.ITariffService;
 import cn.csfz.tariff.util.OkHttpUtils;
 import io.reactivex.Flowable;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,6 +24,9 @@ import java.util.concurrent.Callable;
 public class Controller {
 
 
+    private static String URL = "http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=";
+    private static int SIZE = 2401;
+
     @Autowired
     ITariffService ITariffService;
 
@@ -34,7 +35,7 @@ public class Controller {
 
     @RequestMapping("tariff")
     public Boolean tariff(int index) throws IOException {
-        return Flowable.range(index, 1).map(number -> Jsoup.connect("http://www.hscode.net/IntegrateQueries/YsInfoPager?pageIndex=" + number).post()).map(document -> documentToTariff(document)).collect((Callable<List<Tariff>>) () -> new ArrayList<Tariff>(), (tariffs, tariffs2) -> tariffs.addAll(tariffs2)).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
+        return Flowable.range(index, SIZE).map(number -> Jsoup.connect(URL + number).post()).map(document -> documentToTariff(document)).collect((Callable<List<Tariff>>) () -> new ArrayList<Tariff>(), (tariffs, tariffs2) -> tariffs.addAll(tariffs2)).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
     }
 
 
