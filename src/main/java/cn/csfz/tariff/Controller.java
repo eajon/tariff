@@ -14,11 +14,14 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @RestController
 @Slf4j
@@ -36,7 +39,10 @@ public class Controller {
 
     @RequestMapping("tariff")
     public Boolean tariff(int index) throws IOException {
-        return Flowable.range(index, SIZE).map(number -> Jsoup.connect(URL + number).post()).map(document -> documentToTariff(document)).collect((Callable<List<Tariff>>) () -> new ArrayList<Tariff>(), (tariffs, tariffs2) -> tariffs.addAll(tariffs2)).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
+
+
+        Flux.range(index,SIZE).map(this::getDocument).map(this::documentToTariff).collect((Supplier<ArrayList<Tariff>>) ArrayList::new, ArrayList::addAll).map(tariffs -> ITariffService.saveBatch(tariffs)).block();
+        return Flowable.range(index, SIZE).map(number -> Jsoup.connect(URL + number).post()).map(this::documentToTariff).collect((Callable<List<Tariff>>) ArrayList::new, List::addAll).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
     }
 
 
@@ -66,4 +72,13 @@ public class Controller {
     }
 
 
+
+    private  Document  getDocument(Integer number) {
+        try {
+            return Jsoup.connect(URL+number).post();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
