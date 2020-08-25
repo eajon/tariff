@@ -14,7 +14,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+//import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class Controller {
     public Boolean tariff(int index) throws IOException {
 
 
-        Flux.range(index,SIZE).map(this::getDocument).map(this::documentToTariff).collect((Supplier<ArrayList<Tariff>>) ArrayList::new, ArrayList::addAll).map(tariffs -> ITariffService.saveBatch(tariffs)).block();
+//        Flux.range(index,SIZE).map(this::getDocument).map(this::documentToTariff).collect((Supplier<ArrayList<Tariff>>) ArrayList::new, ArrayList::addAll).map(tariffs -> ITariffService.saveBatch(tariffs)).block();
         return Flowable.range(index, SIZE).map(number -> Jsoup.connect(URL + number).post()).map(this::documentToTariff).collect((Callable<List<Tariff>>) ArrayList::new, List::addAll).map(tariffs -> ITariffService.saveBatch(tariffs)).blockingGet();
     }
 
@@ -60,7 +60,7 @@ public class Controller {
             tariff.setGeneralImportRate(element.child(4).children().get(3).text());
             tariff.setTentativeImportRate(element.child(4).children().get(5).text());
             tariff.setConsumptionRate(element.child(5).children().get(1).text());
-            tariff.setImportTariffRate(element.child(5).children().get(3).text());
+            tariff.setExportTariffRate(element.child(5).children().get(3).text());
             tariff.setExportRebateRate(element.child(5).children().get(5).text());
             tariff.setVatRate(element.child(6).children().get(1).text());
             tariff.setCustomsSupervisionConditions(element.child(6).children().get(3).text());

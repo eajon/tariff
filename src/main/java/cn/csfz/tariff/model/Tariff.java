@@ -64,8 +64,8 @@ public class Tariff {
     @TableField(value ="zf_tariff.consumption_rate")
     private String consumptionRate;
     //进口关税率
-    @TableField(value ="zf_tariff.import_tariff_rate")
-    private String importTariffRate;
+    @TableField(value ="zf_tariff.export_tariff_rate")
+    private String exportTariffRate;
     //出口退税率
     @TableField(value ="zf_tariff.export_rebate_rate")
     private String exportRebateRate;
